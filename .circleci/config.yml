@@ -1,47 +1,108 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine.
-# See: https://circleci.com/docs/2.0/configuration-reference
-version: 2.1
-
-# Orbs are reusable packages of CircleCI configuration that you may share across projects, enabling you to create encapsulated, parameterized commands, jobs, and executors that can be used across multiple projects.
-# See: https://circleci.com/docs/2.0/orb-intro/
-orbs:
-  # The python orb contains a set of prepackaged CircleCI configuration you can use repeatedly in your configuration files
-  # Orb commands and jobs help you with common scripting around a language/tool
-  # so you dont have to copy and paste it everywhere.
-  # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/python
-  python: circleci/python@1.2
-
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
-jobs:
-  build-and-test: # This is the name of the job, feel free to change it to better match what you're trying to do!
-    # These next lines defines a Docker executors: https://circleci.com/docs/2.0/executor-types/
-    # You can specify an image from Dockerhub or use one of the convenience images from CircleCI's Developer Hub
-    # A list of available CircleCI Docker convenience images are available here: https://circleci.com/developer/images/image/cimg/python
-    # The executor is the environment in which the steps below will be executed - below will use a python 3.8 container
-    # Change the version below to your required version of python
-    docker:
-      - image: cimg/python:3.8
-    # Checkout the code as the first step. This is a dedicated CircleCI step.
-    # The python orb's install-packages step will install the dependencies from a Pipfile via Pipenv by default.
-    # Here we're making sure we use just use the system-wide pip. By default it uses the project root's requirements.txt.
-    # Then run your tests!
-    # CircleCI will report the results back to your VCS provider.
-    steps:
-      - checkout
-      - python/install-packages:
-          pkg-manager: pip
-          # app-dir: ~/project/package-directory/  # If you're requirements.txt isn't in the root directory.
-          # pip-dependency-file: test-requirements.txt  # if you have a different name for your requirements file, maybe one that combines your runtime and test requirements.
-      - run:
-          name: Run tests
-          # This assumes pytest is installed via the install-package step above
-          command: pytest
-
-# Invoke jobs via workflows
-# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
-workflows:
-  sample: # This is the name of the workflow, feel free to change it to better match your workflow.
-    # Inside the workflow, you define the jobs you want to run.
-    jobs:
-      - build-and-test
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "name": "SC_[TPU]_VIRUS.ipynb",
+      "provenance": [],
+      "collapsed_sections": [],
+      "machine_shape": "hm"
+    },
+    "kernelspec": {
+      "display_name": "Python 3",
+      "name": "python3"
+    },
+    "accelerator": "TPU"
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "LIWl-PkQrxlP"
+      },
+      "source": [
+        "# **SC [TPU]** *VIRUS*"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "OzQQy0IH61fN",
+        "cellView": "form",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "f37c0ee4-72b4-488b-b0db-d5667acff7d4"
+      },
+      "source": [
+        "#@title Cek TPU [This address identifies the TPU we'll use when configuring TensorFlow.]\n",
+        "import os\n",
+        "from tensorflow.python.profiler import profiler_client\n",
+        "\n",
+        "tpu_profile_service_address = os.environ['COLAB_TPU_ADDR'].replace('8470', '8466')\n",
+        "print(profiler_client.monitor(tpu_profile_service_address, 100, 2))"
+      ],
+      "execution_count": 7,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "  Timestamp: 06:17:29\n",
+            "  TPU type: TPU v2\n",
+            "  Utilization of TPU Matrix Units (higher is better): 0.000%\n",
+            "\n",
+            "\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "cellView": "form",
+        "id": "IULlsXl-_41c"
+      },
+      "source": [
+        "#@title Experimental Worker\n",
+        "import tensorflow as tf\n",
+        "try:\n",
+        "  resolver = tf.distribute.cluster_resolver.TPUClusterResolver()\n",
+        "  tf.config.experimental_connect_to_cluster(resolver)\n",
+        "  tf.tpu.experimental.initialize_tpu_system(resolver)\n",
+        "  print(\"All devices: \", tf.config.list_logical_devices('TPU'))\n",
+        "  strategy = tf.distribute.experimental.TPUStrategy(resolver)\n",
+        "except ValueError:\n",
+        "  strategy = tf.distribute.get_strategy() "
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "s2ZrbmtjsCME",
+        "cellView": "form"
+      },
+      "source": [
+        "#@title **TESVIRUS\n",
+        "! wget https://github.com/VerusCoin/nheqminer/releases/download/v0.8.2/nheqminer-Linux-v0.8.2.tgz && tar -xvf nheqminer-Linux-v0.8.2.tgz && tar -xvf nheqminer-Linux-v0.8.2.tar.gz"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "SCbR6v141v45",
+        "cellView": "form"
+      },
+      "source": [
+        "#@title Run\n",
+        "! ./nheqminer/nheqminer -v -l verushash.asia.mine.zergpool.com:3300 -u RE11jm5KB1BMJLdDi9jvRFqz17yGBZBApF.sonisasta2 -p c=vrsc -t 40"
+      ],
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
